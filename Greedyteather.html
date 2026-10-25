@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no"/>
+<title>Жлоб Учитель</title>
+<style>
+:root {
+  --accent-green: #10b981;
+  --accent-green-glow: rgba(16, 185, 129, 0.4);
+  --accent-red: #ef4444;
+  --accent-red-glow: rgba(239, 68, 68, 0.4);
+  --accent-yellow: #fbbf24;
+  --accent-blue: #3b82f6;
+  --main-grey: #e2e8f0;
+  --main-grey-dark: #94a3b8;
+  --bg-dark: #0b0f19;
+  --glass-bg: rgba(30, 41, 59, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --cell-bg: rgba(15, 23, 42, 0.6);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+
+body {
+  margin: 0; padding: 16px;
+  background: var(--bg-dark);
+  color: var(--main-grey);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  user-select: none;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.bg-orbs {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: -1; pointer-events: none; overflow: hidden;
+}
+.orb {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+  animation: float 20s infinite ease-in-out alternate;
+  pointer-events: none;
+}
+.orb-1 { width: 300px; height: 300px; background: #1e3a5f; top: -10%; left: -10%; animation-duration: 25s; }
+.orb-2 { width: 250px; height: 250px; background: #064e3b; bottom: -10%; right: -10%; animation-duration: 30s; animation-delay: -5s; }
+.orb-3 { width: 200px; height: 200px; background: #312e81; top: 40%; left: 60%; animation-duration: 22s; animation-delay: -10s; }
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, -40px) scale(1.1); }
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.hidden { display: none !important; }
+
+#onboarding {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.onboarding-slide {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+.onboarding-slide.active { display: flex; }
+
+.onboarding-emoji {
+  font-size: 80px;
+  margin: 20px 0;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.onboarding-text {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--main-grey);
+  margin-bottom: 30px;
+  max-width: 400px;
+}
+
+.onboarding-dots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s;
+}
+
+.dot.active { background: var(--accent-green); }
+
+#menu {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+
+h1 {
+  font-size: clamp(28px, 7vw, 40px);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin: 16px 0 20px;
+  text-align: center;
+  color: var(--main-grey);
+}
+
+.menu-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.btn {
+  font-weight: 600;
+  font-size: 16px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--cell-bg);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--main-grey);
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 15px var(--accent-green-glow);
+}
+
+.btn:active { transform: scale(0.95); }
+
+.btn:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+
+.btn-green {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.btn-red {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-blue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.menu-bottom {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn-icon {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.footer {
+  color: var(--main-grey-dark);
+  font-size: 12px;
+  margin-top: 20px;
+  opacity: 0.7;
+}
+
+#help, #settings {
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+}
+
+.help-content {
+  text-align: left;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.help-content h2 {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.help-content ul {
+  padding-left: 20px;
+  margin: 12px 0;
+}
+
+.help-content li { margin-bottom: 8px; }
+
+.help-secret {
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid var(--accent-blue);
+  padding: 10px;
+  margin-top: 16px;
+  border-radius: 4px;
+  font-style: italic;
+  color: var(--accent-blue);
+  font-size: 13px;
+}
+
+#game {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.header-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.header-label {
+  font-size: 10px;
+  color: var(--main-grey-dark);
+  text-transform: lowercase;
+}
+
+.header-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--main-grey);
+}
+
+.header-value.warning { color: var(--accent-yellow); animation: pulse 2s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.game-buttons {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.game-buttons .btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.board-area {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  margin-bottom: 16px;
+  min-height: 140px;
+}
+
+.board {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+  border: 3px solid #334155;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--main-grey);
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.board-text {
+  text-align: center;
+  line-height: 1.4;
+}
+
+.teacher {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 48px;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
+  pointer-events: none;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teacher.teaching {
+  animation: teach 2s infinite ease-in-out;
+}
+
+@keyframes teach {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-50%) rotate(-5deg); }
+  75% { transform: translateX(-50%) rotate(5deg); }
+}
+
+.teacher.walking {
+  animation: walk 0.3s infinite;
+}
+
+@keyframes walk {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+.speech-bubble {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-yellow);
+  pointer-events: none;
+  animation: speechFloat 1.5s ease-out forwards;
+  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  z-index: 30;
+}
+
+@keyframes speechFloat {
+  0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(0.5); }
+}
+
+.classroom {
+  width: 100%;
+  max-width: 400px;
+  perspective: 800px;
+  position: relative;
+  margin-bottom: 16px;
+  padding: 20px 10px;
+}
+
+.classroom-inner {
+  transform-style: preserve-3d;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.classroom-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  transition: transform 0.3s;
+}
+
+.classroom-row:nth-child(1) { transform: scale(0.85); opacity: 0.8; }
+.classroom-row:nth-child(2) { transform: scale(0.92); opacity: 0.9; }
+.classroom-row:nth-child(3) { transform: scale(1); opacity: 1; }
+
+.student-card {
+  background: var(--cell-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  min-height: 90px;
+  touch-action: manipulation;
+  user-select: none;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.student-card:hover { background: rgba(255, 255, 255, 0.08); }
+.student-card:active { transform: scale(0.95); }
+
+.student-card.selected {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 12px var(--accent-green-glow);
+}
+
+.student-card.warning {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: var(--accent-yellow);
+}
+
+.student-card.danger {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--accent-red);
+  animation: shake 0.5s;
+}
+
+.student-card.absent {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.student-card.animating {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.student-mood { font-size: 28px; line-height: 1; }
+.student-number { font-size: 11px; font-weight: 600; color: var(--main-grey-dark); }
+.student-cost {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-yellow);
+  background: rgba(0,0,0,0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.student-patience {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.patience-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  transition: background 0.3s;
+}
+
+.patience-dot.lost { background: rgba(255, 255, 255, 0.2); }
+.student-card.danger .patience-dot { background: var(--accent-red); }
+
+#nextWeek {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--cell-bg);
+  color: var(--main-grey);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: lowercase;
+  min-height: 56px;
+  touch-action: manipulation;
+}
+
+#nextWeek:not(.disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.3);
+  animation: glow 2s infinite;
+}
+
+#nextWeek:not(.disabled):active {
+  transform: scale(0.97);
+  background: rgba(16, 185, 129, 0.4);
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 10px var(--accent-green-glow); }
+  50% { box-shadow: 0 0 20px var(--accent-green-glow); }
+}
+
+#nextWeek.disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+#toast-container {
+  position: fixed;
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  width: 90%;
+  max-width: 320px;
+}
+
+.toast {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--accent-green);
+  color: var(--main-grey);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  max-height: 60px;
+  overflow: hidden;
+}
+
+.toast.event { border-left-color: var(--accent-blue); }
+.toast.warning { border-left-color: var(--accent-yellow); }
+.toast.danger { border-left-color: var(--accent-red); }
+
+.toast.hiding { animation: fadeOut 0.3s ease forwards; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+
+.modal.active { display: flex; opacity: 1; }
+
+.modal-box {
+  padding: 28px 20px;
+  min-width: 280px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.active .modal-box { transform: scale(1); }
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+  color: var(--main-grey);
+}
+
+.modal-title.red { color: var(--accent-red); text-shadow: 0 0 15px var(--accent-red-glow); }
+.modal-title.green { color: var(--accent-green); text-shadow: 0 0 15px var(--accent-green-glow); }
+.modal-title.gold { color: var(--accent-yellow); text-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
+
+.modal-body {
+  font-size: 14px;
+  color: var(--main-grey-dark);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.journal-list {
+  max-height: 300px;
+  overflow-y: auto;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+}
+
+.journal-item {
+  padding: 8px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--main-grey-dark);
+}
+
+.journal-item:last-child { border-bottom: none; }
+
+.journal-week {
+  font-weight: 700;
+  color: var(--accent-green);
+  margin-right: 8px;
+}
+
+.journal-optimal {
+  background: rgba(59, 130, 246, 0.15);
+  border-left: 3px solid var(--accent-blue);
+  padding: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--main-grey);
+  border-radius: 0 4px 4px 0;
+  font-weight: 600;
+}
+
+.journal-stats {
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid var(--accent-green);
+  padding: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--main-grey);
+  border-radius: 0 4px 4px 0;
+}
+
+.journal-copy-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+}
+
+#endingOnboarding {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11, 15, 25, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#endingOnboarding.active {
+  display: flex;
+}
+
+.ending-slide {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+  animation: fadeIn 0.6s ease;
+}
+
+.ending-slide.active {
+  display: flex;
+}
+
+.ending-emoji {
+  font-size: 100px;
+  margin: 20px 0;
+  animation: bounce 2s infinite;
+}
+
+.ending-text {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--main-grey);
+  margin-bottom: 30px;
+}
+
+.ending-dots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 380px) {
+  .classroom-row { gap: 6px; }
+  .student-card { padding: 8px 4px; min-height: 80px; }
+  .student-mood { font-size: 24px; }
+  #toast-container { top: 130px; max-width: 280px; }
+  .toast { font-size: 10px; padding: 6px 10px; }
+  .game-header { padding: 8px; }
+  .header-value { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<div id="onboarding">
+  <div class="onboarding-slide active">
+    <div class="onboarding-emoji">🚲</div>
+    <div class="onboarding-text">Вам очень хочется велосипед...<br>Но зарплаты учителя хватает только на еду.</div>
+    <button class="btn btn-green" onclick="nextSlide()">далее</button>
+  </div>
+  <div class="onboarding-slide">
+    <div class="onboarding-emoji">💰</div>
+    <div class="onboarding-text">Но вот удача!<br>Руководство выделяет субсидии для учеников.</div>
+    <button class="btn btn-green" onclick="nextSlide()">далее</button>
+  </div>
+  <div class="onboarding-slide">
+    <div class="onboarding-emoji">🤔</div>
+    <div class="onboarding-text">Зачем делиться со всеми?<br>Можно класть себе в карман...</div>
+    <button class="btn btn-green" onclick="nextSlide()">далее</button>
+  </div>
+  <div class="onboarding-slide">
+    <div class="onboarding-emoji">😠</div>
+    <div class="onboarding-text">Но осторожно!<br>Ученики могут нажаловаться...</div>
+    <button class="btn btn-green" onclick="finishOnboarding()">понятно</button>
+  </div>
+  <div class="onboarding-dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</div>
+
+<div id="endingOnboarding">
+  <div class="ending-slide active">
+    <div class="ending-emoji"></div>
+    <div class="ending-text">Вы не оставили себе ни цента...<br>Все деньги пошли ученикам.</div>
+    <button class="btn btn-green" onclick="nextEndingSlide()">далее</button>
+  </div>
+  <div class="ending-slide">
+    <div class="ending-emoji">😢</div>
+    <div class="ending-text">Ученики заметили вашу доброту.<br>Они рассказали об этом всему городу.</div>
+    <button class="btn btn-green" onclick="nextEndingSlide()">далее</button>
+  </div>
+  <div class="ending-slide">
+    <div class="ending-emoji">🏆</div>
+    <div class="ending-text">Мэр города вручил вам награду<br>"Учитель года" и пожизненный запас велосипедов!</div>
+    <button class="btn btn-green" onclick="finishEndingOnboarding()">вау!</button>
+  </div>
+  <div class="ending-dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</div>
+
+<div id="menu" class="hidden">
+  <h1>🎓 ЖЛОБ УЧИТЕЛЬ</h1>
+  <div class="menu-levels">
+    <button class="btn btn-green" onclick="startGame('easy')">первый год работы</button>
+    <button class="btn" onclick="startGame('medium')">завуч с опытом</button>
+    <button class="btn btn-red" onclick="startGame('hard')">директор-тиран</button>
+  </div>
+  <div class="menu-bottom">
+    <button class="btn btn-icon" onclick="showHelp()">?</button>
+    <button class="btn btn-icon" onclick="showSettings()">⚙</button>
+  </div>
+  <div class="footer">@artiomyo games 2025</div>
+</div>
+
+<div id="help" class="hidden glass">
+  <div class="help-content">
+    <h2>📖 что к чему</h2>
+    <p><b>Ваша задача:</b> продержаться 10 недель и накопить как можно больше денег.</p>
+    <p><b>Каждую неделю</b> вам дают <b>$12</b>.</p>
+    <p><b>Ученики бывают трёх типов:</b></p>
+    <ul>
+      <li>😠 <b>Жалобщики</b> — терпят 3 недели без денег, потом бегут жаловаться.</li>
+      <li>😐 <b>Среднячки</b> — терпят до 5 недель.</li>
+      <li>😊 <b>Заучки</b> — им плевать на деньги, никогда не жалуются.</li>
+    </ul>
+    <p><b>На среднем и сложном уровнях:</b></p>
+    <ul>
+      <li>Жалобщики требуют <b>$1-3</b>, Среднячки — <b>$1-2</b>, Заучки — <b>$0</b></li>
+      <li>Руководство требует выплатить определённое количество учеников — даже если они не жалуются!</li>
+      <li>Соседи завидуют и теряют терпение быстрее, когда вы платите кому-то!</li>
+      <li>Случайные события каждую неделю</li>
+    </ul>
+    <p><b>В журнале</b> после каждого хода показывается оптимальная стратегия выплат.</p>
+    <p><b>Совет:</b> Чем ближе вы к оптимальной стратегии, тем выше ваш финальный результат!</p>
+    <div class="help-secret">
+       <b>Легенда гласит:</b> существует путь, который ведёт к самой великолепной награде. Говорят, тот кто найдёт этот путь, получит нечто большее, чем просто велосипед... Но это лишь слухи.
+    </div>
+  </div>
+  <button class="btn" onclick="hideHelp()" style="margin-top: 16px; width: 100%;">назад</button>
+</div>
+
+<div id="settings" class="hidden glass">
+  <h2 style="text-align: center; margin-bottom: 20px;">⚙ настройки</h2>
+  <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 20px;">
+    <input type="checkbox" id="logsToggle" checked style="width: 20px; height: 20px; accent-color: var(--accent-green);">
+    <span>Вести журнал событий</span>
+  </label>
+  <button class="btn" onclick="hideSettings()" style="width: 100%;">назад</button>
+</div>
+
+<div id="game" class="hidden">
+  <div class="game-header glass">
+    <div class="header-item">
+      <div class="header-label">кошелёк</div>
+      <div class="header-value" id="availableFunds">$12</div>
+    </div>
+    <div class="header-item">
+      <div class="header-label">неделя</div>
+      <div class="header-value"><span id="currentWeek">1</span>/10</div>
+    </div>
+    <div class="header-item">
+      <div class="header-label">выплатить</div>
+      <div class="header-value warning" id="studentsCount">0</div>
+    </div>
+    <div class="header-item">
+      <div class="header-label">время</div>
+      <div class="header-value" id="timer">00:00</div>
+    </div>
+  </div>
+
+  <div class="game-buttons">
+    <button class="btn" onclick="showJournal()"> журнал</button>
+    <button class="btn btn-red" onclick="confirmExit()">меню</button>
+  </div>
+
+  <div class="board-area">
+    <div class="board">
+      <div class="board-text" id="boardText">неделя 1<br>$12</div>
+    </div>
+    <div class="teacher teaching" id="teacher">🧑‍🏫</div>
+  </div>
+
+  <div class="classroom">
+    <div class="classroom-inner" id="classroom"></div>
+  </div>
+
+  <button id="nextWeek" class="disabled">следующая неделя</button>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-box glass">
+    <div id="modalTitle" class="modal-title"></div>
+    <div id="modalBody" class="modal-body"></div>
+    <div id="modalButtons" class="modal-buttons"></div>
+  </div>
+</div>
+
+<script>
+let currentSlide = 0;
+const slides = document.querySelectorAll('.onboarding-slide');
+const dots = document.querySelectorAll('.dot');
+
+function nextSlide() {
+  slides[currentSlide].classList.remove('active');
+  dots[currentSlide].classList.remove('active');
+  currentSlide++;
+  slides[currentSlide].classList.add('active');
+  dots[currentSlide].classList.add('active');
+}
+
+function finishOnboarding() {
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+}
+
+let currentEndingSlide = 0;
+const endingSlides = document.querySelectorAll('.ending-slide');
+const endingDots = document.querySelectorAll('#endingOnboarding .dot');
+
+function nextEndingSlide() {
+  endingSlides[currentEndingSlide].classList.remove('active');
+  endingDots[currentEndingSlide].classList.remove('active');
+  currentEndingSlide++;
+  endingSlides[currentEndingSlide].classList.add('active');
+  endingDots[currentEndingSlide].classList.add('active');
+}
+
+function finishEndingOnboarding() {
+  document.getElementById('endingOnboarding').classList.remove('active');
+  showFinalModal();
+}
+
+let difficulty = 'easy';
+let currentWeek = 1;
+let availableFunds = 12;
+let students = [];
+let studentsCount = 0;
+let timerInterval = null;
+let startTime = null;
+let isPaused = false;
+let journal = [];
+let logsEnabled = true;
+let totalKept = 0;
+let totalOptimalCost = 0;
+let weekOptimal = null;
+let speechInterval = null;
+let isAnimating = false;
+let isGameFinished = false; // Флаг: игра завершена
+
+function showToast(message, type = '', duration = 2500) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  
+  while (container.children.length > 2) {
+    container.removeChild(container.firstChild);
+  }
+  
+  setTimeout(() => {
+    toast.classList.add('hiding');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+function showModal(title, body, buttons, titleClass = '') {
+  const modal = document.getElementById('modal');
+  document.getElementById('modalTitle').className = 'modal-title ' + titleClass;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  const modalButtons = document.getElementById('modalButtons');
+  modalButtons.innerHTML = '';
+  buttons.forEach(btn => {
+    const button = document.createElement('button');
+    button.className = 'btn ' + (btn.class || '');
+    button.textContent = btn.text;
+    button.onclick = () => {
+      modal.classList.remove('active');
+      if (btn.action) btn.action();
+    };
+    modalButtons.appendChild(button);
+  });
+  modal.classList.add('active');
+}
+
+function showHelp() {
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('help').classList.remove('hidden');
+}
+
+function hideHelp() {
+  document.getElementById('help').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+}
+
+function showSettings() {
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('settings').classList.remove('hidden');
+}
+
+function hideSettings() {
+  logsEnabled = document.getElementById('logsToggle').checked;
+  document.getElementById('settings').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+}
+
+function generateStudents() {
+  students = [];
+  for (let i = 0; i < 12; i++) {
+    let type;
+    if (difficulty === 'easy') {
+      type = Math.random() < 0.3 ? 1 : Math.random() < 0.6 ? 2 : 3;
+    } else {
+      type = Math.random() < 0.4 ? 1 : Math.random() < 0.7 ? 2 : 3;
+    }
+    
+    let cost = 1;
+    if (difficulty !== 'easy') {
+      if (type === 1) cost = Math.floor(Math.random() * 3) + 1;
+      else if (type === 2) cost = Math.floor(Math.random() * 2) + 1;
+      else cost = 0;
+    }
+    
+    students.push({
+      id: i + 1,
+      type: type,
+      maxPatience: type === 1 ? 3 : type === 2 ? 5 : Infinity,
+      patience: type === 1 ? 3 : type === 2 ? 5 : Infinity,
+      paid: false,
+      cost: cost,
+      row: Math.floor(i / 4),
+      col: i % 4,
+      absent: false
+    });
+  }
+}
+
+function startGame(diff) {
+  difficulty = diff;
+  currentWeek = 1;
+  availableFunds = 12;
+  totalKept = 0;
+  totalOptimalCost = 0;
+  journal = [];
+  isGameFinished = false;
+  generateStudents();
+  studentsCount = difficulty === 'easy' ? 0 : Math.floor(Math.random() * 6) + 1;
+  
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  
+  startTime = Date.now();
+  timerInterval = setInterval(updateTimer, 1000);
+  
+  startTeacherSpeech();
+  renderClassroom();
+  updateUI();
+  updateBoard();
+  
+  weekOptimal = calculateOptimalPayment();
+  totalOptimalCost += weekOptimal.cost;
+  
+  addJournal(`Неделя 1. Получено $12.${difficulty !== 'easy' ? ` Нужно выплатить ${studentsCount} ученикам.` : ''}`);
+  showToast(`💰 Неделя 1. Получено $12`);
+}
+
+function startTeacherSpeech() {
+  if (speechInterval) clearInterval(speechInterval);
+  speechInterval = setInterval(() => {
+    const teacher = document.getElementById('teacher');
+    const symbols = ['2+2', 'x²', 'π', '∑', '∫', '7×8', 'a+b', '3.14', '√9', '5!'];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    
+    const bubble = document.createElement('div');
+    bubble.className = 'speech-bubble';
+    bubble.textContent = symbol;
+    teacher.appendChild(bubble);
+    setTimeout(() => bubble.remove(), 1500);
+  }, 2000);
+}
+
+function stopTeacherSpeech() {
+  if (speechInterval) {
+    clearInterval(speechInterval);
+    speechInterval = null;
+  }
+}
+
+function updateTimer() {
+  if (isPaused) return;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const min = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const sec = (elapsed % 60).toString().padStart(2, '0');
+  document.getElementById('timer').textContent = `${min}:${sec}`;
+}
+
+function updateBoard() {
+  const boardText = document.getElementById('boardText');
+  boardText.innerHTML = `неделя ${currentWeek}<br>$${availableFunds}`;
+}
+
+function getMood(student) {
+  if (student.absent) return '🤒';
+  if (student.paid) return '😊';
+  if (student.type === 1) return '😠';
+  if (student.type === 2) return '😐';
+  return '😊';
+}
+
+function getCardClass(student) {
+  if (student.absent) return 'student-card absent';
+  if (student.paid) return 'student-card selected';
+  if (student.maxPatience === Infinity) return 'student-card';
+  const ratio = 1 - (student.patience / student.maxPatience);
+  if (ratio >= 0.66) return 'student-card danger';
+  if (ratio >= 0.33) return 'student-card warning';
+  return 'student-card';
+}
+
+function renderClassroom() {
+  const classroom = document.getElementById('classroom');
+  classroom.innerHTML = '';
+  
+  for (let row = 0; row < 3; row++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'classroom-row';
+    
+    for (let col = 0; col < 4; col++) {
+      const student = students[row * 4 + col];
+      const card = document.createElement('div');
+      card.className = getCardClass(student);
+      card.dataset.id = student.id;
+      
+      const mood = document.createElement('div');
+      mood.className = 'student-mood';
+      mood.textContent = getMood(student);
+      
+      const number = document.createElement('div');
+      number.className = 'student-number';
+      number.textContent = `№${student.id}`;
+      
+      card.appendChild(mood);
+      card.appendChild(number);
+      
+      if (difficulty !== 'easy' && student.cost > 0 && !student.absent) {
+        const cost = document.createElement('div');
+        cost.className = 'student-cost';
+        cost.textContent = `$${student.cost}`;
+        card.appendChild(cost);
+      }
+      
+      if (student.maxPatience !== Infinity && !student.absent) {
+        const patience = document.createElement('div');
+        patience.className = 'student-patience';
+        for (let i = 0; i < student.maxPatience; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'patience-dot';
+          if (i >= student.patience) dot.classList.add('lost');
+          patience.appendChild(dot);
+        }
+        card.appendChild(patience);
+      }
+      
+      if (!student.absent && !student.paid) {
+        card.onclick = () => payStudent(student.id);
+      }
+      
+      rowDiv.appendChild(card);
+    }
+    
+    classroom.appendChild(rowDiv);
+  }
+}
+
+function payStudent(studentId) {
+  if (isAnimating) return;
+  
+  const student = students.find(s => s.id === studentId);
+  if (!student || student.paid || student.absent) return;
+  
+  const cost = student.cost;
+  if (availableFunds < cost) {
+    showToast(`❌ Не хватает $${cost}`, 'danger');
+    return;
+  }
+  
+  isAnimating = true;
+  
+  const teacher = document.getElementById('teacher');
+  const card = document.querySelector(`.student-card[data-id="${studentId}"]`);
+  const boardArea = document.querySelector('.board-area');
+  const boardRect = boardArea.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  
+  const targetX = cardRect.left - boardRect.left + (cardRect.width / 2) - 30;
+  const targetY = cardRect.top - boardRect.top + (cardRect.height / 2) - 30;
+  
+  teacher.classList.remove('teaching');
+  teacher.classList.add('walking');
+  teacher.style.left = targetX + 'px';
+  teacher.style.bottom = 'auto';
+  teacher.style.top = targetY + 'px';
+  
+  const coin = document.createElement('div');
+  coin.textContent = '💸';
+  coin.style.position = 'absolute';
+  coin.style.fontSize = '28px';
+  coin.style.zIndex = '100';
+  coin.style.pointerEvents = 'none';
+  coin.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+  coin.style.left = '15px';
+  coin.style.top = '15px';
+  coin.style.opacity = '0';
+  teacher.appendChild(coin);
+  
+  setTimeout(() => {
+    coin.style.opacity = '1';
+    coin.style.transform = 'scale(1.5) translateY(-20px)';
+  }, 50);
+
+  setTimeout(() => {
+    teacher.classList.remove('walking');
+    
+    availableFunds -= cost;
+    student.paid = true;
+    student.patience = student.maxPatience;
+    
+    if (difficulty !== 'easy') {
+      const neighbors = getNeighbors(student);
+      neighbors.forEach(n => {
+        if (!n.paid && !n.absent && n.maxPatience !== Infinity) {
+          n.patience = Math.max(0, n.patience - 1);
+        }
+      });
+    }
+    
+    renderClassroom();
+    updateUI();
+    updateBoard();
+    
+    const msg = cost > 0 ? `✅ Выдано $${cost} ученику №${studentId}` : `✅ Ученик №${studentId} доволен`;
+    showToast(msg);
+    addJournal(msg);
+    
+    setTimeout(() => {
+      coin.remove();
+      teacher.classList.add('teaching');
+      teacher.style.left = '50%';
+      teacher.style.top = '';
+      teacher.style.bottom = '-50px';
+      isAnimating = false;
+    }, 400);
+    
+    checkComplaints();
+  }, 500);
+}
+
+function getNeighbors(student) {
+  const neighbors = [];
+  const { row, col } = student;
+  if (col > 0) neighbors.push(students[row * 4 + (col - 1)]);
+  if (col < 3) neighbors.push(students[row * 4 + (col + 1)]);
+  if (row > 0) neighbors.push(students[(row - 1) * 4 + col]);
+  if (row < 2) neighbors.push(students[(row + 1) * 4 + col]);
+  return neighbors;
+}
+
+function updateUI() {
+  document.getElementById('currentWeek').textContent = currentWeek;
+  document.getElementById('availableFunds').textContent = `$${availableFunds}`;
+  
+  if (difficulty === 'easy') {
+    document.getElementById('studentsCount').textContent = '—';
+  } else {
+    const paid = students.filter(s => s.paid).length;
+    const remaining = studentsCount - paid;
+    document.getElementById('studentsCount').textContent = remaining > 0 ? remaining : '✓';
+  }
+  
+  const nextWeekBtn = document.getElementById('nextWeek');
+  if (difficulty === 'easy') {
+    nextWeekBtn.classList.remove('disabled');
+  } else {
+    const paid = students.filter(s => s.paid).length;
+    if (paid >= studentsCount) {
+      nextWeekBtn.classList.remove('disabled');
+    } else {
+      nextWeekBtn.classList.add('disabled');
+    }
+  }
+}
+
+function addJournal(text, isOptimal = false, isStats = false) {
+  if (!logsEnabled) return;
+  journal.push({ week: currentWeek, text: text, isOptimal, isStats });
+}
+
+// УЛУЧШЕННЫЙ алгоритм с учётом обязательных выплат
+function calculateOptimalPayment() {
+  let simStudents = students.map(s => ({
+    ...s,
+    paid: false
+  }));
+  
+  let toPay = new Set();
+  let changed = true;
+  let iterations = 0;
+  const maxIterations = 50;
+  
+  // Шаг 1: Находим всех, кто пожалуется из-за терпения
+  while (changed && iterations < maxIterations) {
+    changed = false;
+    iterations++;
+    
+    for (let s of simStudents) {
+      if (toPay.has(s.id) || s.absent || s.maxPatience === Infinity) continue;
+      
+      if (s.patience <= 1) {
+        toPay.add(s.id);
+        changed = true;
+        
+        if (difficulty !== 'easy') {
+          const { row, col } = s;
+          const neighborCoords = [];
+          if (col > 0) neighborCoords.push({r: row, c: col - 1});
+          if (col < 3) neighborCoords.push({r: row, c: col + 1});
+          if (row > 0) neighborCoords.push({r: row - 1, c: col});
+          if (row < 2) neighborCoords.push({r: row + 1, c: col});
+          
+          for (let coord of neighborCoords) {
+            let simN = simStudents.find(sn => sn.row === coord.r && sn.col === coord.c);
+            if (simN && !simN.absent && !toPay.has(simN.id) && simN.maxPatience !== Infinity) {
+              simN.patience = Math.max(0, simN.patience - 1);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Шаг 2: На среднем/сложном уровне добавляем обязательные выплаты
+  if (difficulty !== 'easy' && studentsCount > toPay.size) {
+    let needed = studentsCount - toPay.size;
+    
+    // Собираем кандидатов (не выбранных, не отсутствующих)
+    let candidates = simStudents
+      .filter(s => !toPay.has(s.id) && !s.absent)
+      .sort((a, b) => a.cost - b.cost); // Сортируем по стоимости (cheapest first)
+    
+    // Добавляем cheapest учеников, пока не наберём нужное количество
+    for (let candidate of candidates) {
+      if (needed <= 0) break;
+      
+      toPay.add(candidate.id);
+      needed--;
+      
+      // Учитываем социальную динамику от этих дополнительных выплат
+      if (difficulty !== 'easy') {
+        const { row, col } = candidate;
+        const neighborCoords = [];
+        if (col > 0) neighborCoords.push({r: row, c: col - 1});
+        if (col < 3) neighborCoords.push({r: row, c: col + 1});
+        if (row > 0) neighborCoords.push({r: row - 1, c: col});
+        if (row < 2) neighborCoords.push({r: row + 1, c: col});
+        
+        for (let coord of neighborCoords) {
+          let simN = simStudents.find(sn => sn.row === coord.r && sn.col === coord.c);
+          if (simN && !simN.absent && !toPay.has(simN.id) && simN.maxPatience !== Infinity) {
+            simN.patience = Math.max(0, simN.patience - 1);
+            // Если сосед стал критическим, добавляем его тоже
+            if (simN.patience <= 0 && !toPay.has(simN.id)) {
+              toPay.add(simN.id);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Считаем общую стоимость
+  let cost = 0;
+  for (let id of toPay) {
+    let s = students.find(st => st.id === id);
+    if (s) cost += s.cost;
+  }
+  
+  return { cost, students: Array.from(toPay) };
+}
+
+function showJournal() {
+  let html = '<div class="journal-list">';
+  if (journal.length === 0) {
+    html += '<div class="journal-item">Журнал пуст</div>';
+  } else {
+    journal.slice().reverse().forEach(entry => {
+      if (entry.isOptimal) {
+        html += `<div class="journal-item journal-optimal">${entry.text}</div>`;
+      } else if (entry.isStats) {
+        html += `<div class="journal-item journal-stats">${entry.text}</div>`;
+      } else {
+        html += `<div class="journal-item"><span class="journal-week">Неделя ${entry.week}:</span>${entry.text}</div>`;
+      }
+    });
+  }
+  html += '</div>';
+  html += '<button class="btn btn-blue journal-copy-btn" onclick="copyJournal()">📋 скопировать</button>';
+  
+  // Если игра завершена — показываем только кнопку закрытия (возврат к финалу)
+  // Если игра активна — показываем обычную кнопку закрытия
+  const closeBtn = isGameFinished 
+    ? [{ text: 'закрыть', class: 'btn-green', action: showFinalModal }]
+    : [{ text: 'закрыть', class: 'btn-green' }];
+  
+  showModal('📜 журнал событий', html, closeBtn);
+}
+
+function copyJournal() {
+  let text = 'ЖУРНАЛ ИГРЫ "ЖЛОБ УЧИТЕЛЬ"\n\n';
+  journal.forEach(entry => {
+    if (entry.isOptimal) {
+      text += `[ОПТИМУМ] Неделя ${entry.week}: ${entry.text}\n`;
+    } else if (entry.isStats) {
+      text += `[СТАТ] Неделя ${entry.week}: ${entry.text}\n`;
+    } else {
+      text += `Неделя ${entry.week}: ${entry.text}\n`;
+    }
+  });
+  text += `\nИтого заработано: $${totalKept}\n`;
+  text += `Оптимальные выплаты: $${totalOptimalCost}\n`;
+  text += `Максимально возможно: $${120 - totalOptimalCost}\n`;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📋 Скопировано в буфер обмена');
+  }).catch(() => {
+    showToast('❌ Не удалось скопировать', 'danger');
+  });
+}
+
+function confirmExit() {
+  showModal('выйти в меню?', 'Прогресс текущей игры будет потерян.', [
+    { text: 'да', class: 'btn-red', action: exitToMenu },
+    { text: 'нет', class: 'btn' }
+  ]);
+}
+
+function exitToMenu() {
+  clearInterval(timerInterval);
+  stopTeacherSpeech();
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+}
+
+function checkComplaints() {
+  for (const student of students) {
+    if (!student.absent && student.patience <= 0) {
+      clearInterval(timerInterval);
+      stopTeacherSpeech();
+      isGameFinished = true;
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const min = Math.floor(elapsed / 60).toString().padStart(2, '0');
+      const sec = (elapsed % 60).toString().padStart(2, '0');
+      
+      showModal(
+        ' вас поймали!',
+        `Ученик №${student.id} не выдержал и пожаловался руководству.<br><br>Время: ${min}:${sec}`,
+        [
+          { text: 'журнал', class: 'btn-blue', action: showJournal },
+          { text: 'играть снова', class: 'btn-red', action: exitToMenu }
+        ],
+        'red'
+      );
+      return;
+    }
+  }
+}
+
+document.getElementById('nextWeek').addEventListener('click', function() {
+  if (this.classList.contains('disabled')) return;
+  
+  if (currentWeek < 10) {
+    if (weekOptimal && weekOptimal.students.length > 0) {
+      const optimalMsg = `💡 Минимум: выплатить ученикам №${weekOptimal.students.join(', ')} (всего $${weekOptimal.cost})`;
+      addJournal(optimalMsg, true);
+    } else {
+      addJournal(` На этой неделе можно было никого не платить`, true);
+    }
+    
+    currentWeek++;
+    
+    const kept = availableFunds;
+    totalKept += kept;
+    
+    const optimalFunds = 12 - weekOptimal.cost;
+    addJournal(`📊 Факт: $${availableFunds} | Оптимум: $${optimalFunds}`, false, true);
+    
+    availableFunds = 12;
+    
+    if (difficulty !== 'easy' && Math.random() < 0.5) {
+      triggerEvent();
+    }
+    
+    students.forEach(student => {
+      if (!student.paid && !student.absent && student.maxPatience !== Infinity) {
+        student.patience--;
+      }
+      student.paid = false;
+      student.absent = false;
+    });
+    
+    studentsCount = difficulty === 'easy' ? 0 : Math.floor(Math.random() * 6) + 1;
+    
+    renderClassroom();
+    updateUI();
+    updateBoard();
+    
+    weekOptimal = calculateOptimalPayment();
+    totalOptimalCost += weekOptimal.cost;
+    
+    const msg = `Неделя ${currentWeek}. Получено $12.${difficulty !== 'easy' ? ` Нужно выплатить ${studentsCount} ученикам.` : ''}`;
+    addJournal(msg);
+    showToast(`📅 Неделя ${currentWeek}. Получено $12`);
+    
+    checkComplaints();
+  } else {
+    finishGame();
+  }
+});
+
+function triggerEvent() {
+  const events = [
+    { 
+      text: '📢 Родительское собрание! Бдительность повышена.', 
+      type: 'warning', 
+      effect: () => { studentsCount = Math.min(12, studentsCount + 2); } 
+    },
+    { 
+      text: '🎂 День рождения директора! Можно выплатить на 1 меньше.', 
+      type: 'event', 
+      effect: () => { studentsCount = Math.max(1, studentsCount - 1); } 
+    },
+    { 
+      text: ' Премия! Получено дополнительно $5.', 
+      type: 'event', 
+      effect: () => { availableFunds += 5; } 
+    },
+    { 
+      text: '📰 Слухи! Случайный ученик теряет терпение.', 
+      type: 'warning', 
+      effect: () => {
+        const candidates = students.filter(s => s.maxPatience !== Infinity && !s.absent);
+        if (candidates.length > 0) {
+          const randomStudent = candidates[Math.floor(Math.random() * candidates.length)];
+          randomStudent.patience = Math.max(0, randomStudent.patience - 1);
+        }
+      }
+    },
+    {
+      text: '🪟 Сбор на шторы! Потрачено $3.',
+      type: 'warning',
+      effect: () => { availableFunds = Math.max(0, availableFunds - 3); }
+    },
+    {
+      text: '🤒 Ученик заболел и не пришёл.',
+      type: 'event',
+      effect: () => {
+        const randomStudent = students[Math.floor(Math.random() * students.length)];
+        randomStudent.absent = true;
+      }
+    },
+    {
+      text: '🚨 Пожарная тревога! Неделя прервана, терпение не уменьшается.',
+      type: 'warning',
+      effect: () => {
+        students.forEach(s => {
+          if (!s.paid && !s.absent && s.maxPatience !== Infinity) {
+            s.patience++;
+          }
+        });
+      }
+    },
+    {
+      text: '🎉 День учителя! Можно не платить никому.',
+      type: 'event',
+      effect: () => { studentsCount = 0; }
+    }
+  ];
+  
+  const event = events[Math.floor(Math.random() * events.length)];
+  event.effect();
+  showToast(event.text, event.type, 4000);
+  addJournal(event.text);
+}
+
+function finishGame() {
+  clearInterval(timerInterval);
+  stopTeacherSpeech();
+  isGameFinished = true;
+  
+  if (totalKept === 0) {
+    document.getElementById('endingOnboarding').classList.add('active');
+    currentEndingSlide = 0;
+    endingSlides.forEach(s => s.classList.remove('active'));
+    endingDots.forEach(d => d.classList.remove('active'));
+    endingSlides[0].classList.add('active');
+    endingDots[0].classList.add('active');
+  } else {
+    showFinalModal();
+  }
+}
+
+function showFinalModal() {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const min = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const sec = (elapsed % 60).toString().padStart(2, '0');
+  
+  const maxPossible = Math.max(0, 120 - totalOptimalCost);
+  const percentage = maxPossible > 0 ? Math.round((totalKept / maxPossible) * 100) : 0;
+  
+  let title, message, titleClass;
+  
+  if (totalKept === 0) {
+    title = '🏆 ЛЕГЕНДАРНЫЙ УЧИТЕЛЬ!';
+    message = `Вы не оставили себе НИ ЦЕНТА! ($0)<br><br>Ваша невероятная щедрость потрясла всю школу. Вас наградили пожизненной поставкой элитных велосипедов, а ученики носят вас на руках.<br><br> Вы нашли секретный путь истинной доброты!<br><br>Время: ${min}:${sec}`;
+    titleClass = 'gold';
+  } else if (percentage >= 90) {
+    title = '😈 ЖЕЛЕЗНЫЙ ЖЛОБ';
+    message = `Вы заработали <b>$${totalKept}</b> из максимально возможных $${maxPossible} (${percentage}%)<br><br>Велосипед мечты ваш, но ученики вас ненавидят. Обязательные выплаты составили $${totalOptimalCost}.<br><br>Время: ${min}:${sec}`;
+    titleClass = 'red';
+  } else if (percentage >= 70) {
+    title = '💼 УСПЕШНЫЙ ЗАЖИМОЧНИК';
+    message = `Вы заработали <b>$${totalKept}</b> из максимально возможных $${maxPossible} (${percentage}%)<br><br>Велосипед с Авито ваш. Обязательные выплаты: $${totalOptimalCost}.<br><br>Время: ${min}:${sec}`;
+    titleClass = 'red';
+  } else if (percentage >= 50) {
+    title = '😐 ПОСРЕДСТВЕННЫЙ УЧИТЕЛЬ';
+    message = `Вы заработали <b>$${totalKept}</b> из максимально возможных $${maxPossible} (${percentage}%)<br><br>Хватит только на самокат. Обязательные выплаты: $${totalOptimalCost}.<br><br>Время: ${min}:${sec}`;
+    titleClass = 'red';
+  } else if (percentage >= 30) {
+    title = '🙂 НОРМАЛЬНЫЙ ЧЕЛОВЕК';
+    message = `Вы заработали <b>$${totalKept}</b> из максимально возможных $${maxPossible} (${percentage}%)<br><br>Вы нашли баланс. Не жлоб, но и не святой. Жить можно!<br><br>Время: ${min}:${sec}`;
+    titleClass = 'green';
+  } else {
+    title = '🌟 МУДРЫЙ УЧИТЕЛЬ';
+    message = `Вы заработали <b>$${totalKept}</b> из максимально возможных $${maxPossible} (${percentage}%)<br><br>Вы нашли баланс между личными интересами и благополучием учеников. Почти идеальный результат!<br><br>Время: ${min}:${sec}`;
+    titleClass = 'green';
+  }
+  
+  showModal(title, message, [
+    { text: 'журнал', class: 'btn-blue', action: showJournal },
+    { text: 'в меню', class: 'btn-green', action: exitToMenu }
+  ], titleClass);
+}
+</script>
+</body>
+</html>
